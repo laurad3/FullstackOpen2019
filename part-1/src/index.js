@@ -7,64 +7,59 @@ const Button = (props) => {
 	);
 };
 
-const getSum = (values) => {
-	return values.good + values.neutral + values.bad;
-}
-
-const Statistics = (props) => {
-	const sum = getSum(props);
-	const average = (props.good - props.bad) / sum;
-	const positive = (props.good / sum) * 100;
-
-	if (sum > 0) {
-		return (
-			<table>
-				<tbody>
-					<Statistic text="good" value={props.good} />
-					<Statistic text="neutral" value={props.neutral} />
-					<Statistic text="bad" value={props.bad} />
-
-					<Statistic text="all" value={sum} />
-					<Statistic text="average" value={average} />
-					<Statistic text="positive" value={positive + " %"} />
-				</tbody>
-			</table>
-		);	
-	} else {
-		return(
-			<p>No feedback given</p>
-		);
-	}
+const getRandom = (count) => {
+	return Math.floor(Math.random() * count);
 };
 
-const Statistic = (props) => {
-	return(
-		<tr>
-			<td>{props.text}</td>
-			<td>{props.value}</td>
-		</tr>
-	);
+const initializeArray = (count) => {
+	return new Array(count).fill(0);
 };
 
-const App = (props) => {
-	const [good, setGood] = useState(0);
-	const [neutral, setNeutral] = useState(0);
-	const [bad, setBad] = useState(0);
+const App = ({anecdotes}) => {
+	const count = anecdotes.length;
+	const pointsArray = initializeArray(count);
+
+	const [selected, setSelected] = useState(0);
+	const [points, setPoints] = useState(pointsArray);
+
+	const indexOfMaxVotes = points.indexOf(Math.max(...points));
+
+	const handleClick = () => {
+		const random = getRandom(count);
+		setSelected(random);
+	};
+
+	const handleVote = () => {
+		const copy = [...points];
+		copy[selected] += 1;
+		setPoints(copy);
+	};
 
 	return (
 		<div>
-			<h2>Give Feedback</h2>
-			<Button text="good" handleClick={() => setGood(good + 1)}/>
-			<Button text="neutral" handleClick={() => setNeutral(neutral + 1)} />
-			<Button text="bad" handleClick={() => setBad(bad + 1)}/>
+			<h2>Anecdote of the day</h2>
+			<p>{anecdotes[selected]}</p>
+			<p>has {points[selected]} votes</p>
+			<Button text="next anecdote" handleClick={handleClick} />
+			<Button text="vote" handleClick={handleVote} />
 
-			<h3>Statistics</h3>
-			<Statistics good={good} neutral={neutral} bad={bad} />
+			<h2>Anecdote with the most votes</h2>
+			<p>{anecdotes[indexOfMaxVotes]}</p>
+			<p>has {points[indexOfMaxVotes]} votes</p>
 		</div>
 	);
 };
 
+const anecdotes = [
+	'If it hurts, do it more often',
+	'Adding manpower to a late software project makes it later!',
+	'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
+	'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+	'Premature optimization is the root of all evil.',
+	'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
+];
+
 ReactDOM.render(
-	<App />,
+	<App anecdotes={anecdotes} />,
 	document.getElementById('root')
 );
