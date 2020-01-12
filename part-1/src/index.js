@@ -1,60 +1,70 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
-const Header = (props) => {
+const Button = (props) => {
 	return (
-		<h1>{props.course.name}</h1>
+		<button onClick={props.handleClick}>{props.text}</button>
 	);
 };
 
-const Part = (props) => {
-	return (
-		<p>{props.part.name} {props.part.exercises}</p>
+const getSum = (values) => {
+	return values.good + values.neutral + values.bad;
+}
+
+const Statistics = (props) => {
+	const sum = getSum(props);
+	const average = (props.good - props.bad) / sum;
+	const positive = (props.good / sum) * 100;
+
+	if (sum > 0) {
+		return (
+			<table>
+				<tbody>
+					<Statistic text="good" value={props.good} />
+					<Statistic text="neutral" value={props.neutral} />
+					<Statistic text="bad" value={props.bad} />
+
+					<Statistic text="all" value={sum} />
+					<Statistic text="average" value={average} />
+					<Statistic text="positive" value={positive + " %"} />
+				</tbody>
+			</table>
+		);	
+	} else {
+		return(
+			<p>No feedback given</p>
+		);
+	}
+};
+
+const Statistic = (props) => {
+	return(
+		<tr>
+			<td>{props.text}</td>
+			<td>{props.value}</td>
+		</tr>
 	);
 };
 
-const Content = (props) => {
+const App = (props) => {
+	const [good, setGood] = useState(0);
+	const [neutral, setNeutral] = useState(0);
+	const [bad, setBad] = useState(0);
+
 	return (
 		<div>
-			<Part part={props.parts[0]} />
-			<Part part={props.parts[1]} />
-			<Part part={props.parts[2]} />
+			<h2>Give Feedback</h2>
+			<Button text="good" handleClick={() => setGood(good + 1)}/>
+			<Button text="neutral" handleClick={() => setNeutral(neutral + 1)} />
+			<Button text="bad" handleClick={() => setBad(bad + 1)}/>
+
+			<h3>Statistics</h3>
+			<Statistics good={good} neutral={neutral} bad={bad} />
 		</div>
 	);
 };
 
-const Total = (props) => {
-	return (
-		<p>Number of exercises {props.parts[0].exercises + props.parts[1].exercises + props.parts[2].exercises}</p>
-	);
-};
-
-const App = () => {
-	const course = {
-		name: 'Half Stack application development',
-		parts: [
-			{
-				name: 'Fundamentals of React',
-				exercises: 10,
-			},
-			{
-				name: 'Using props to pass data',
-				exercises: 7,
-			},
-			{
-				name: 'State of a component',
-				exercises: 14,
-			},
-		]
-	};
-
-	return (
-		<div>
-			<Header course={course} />
-			<Content parts={course.parts} />
-			<Total parts={course.parts} />
-		</div>
-	)
-};
-
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(
+	<App />,
+	document.getElementById('root')
+);
