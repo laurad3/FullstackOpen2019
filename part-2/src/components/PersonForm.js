@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PersonForm = (props) => {
+const PersonForm = props => {
     return (
         <form onSubmit={props.handleSubmit}>
             <div>name: <input value={props.newName} onChange={props.handleName} /></div>
