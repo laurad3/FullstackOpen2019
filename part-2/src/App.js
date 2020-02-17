@@ -9,14 +9,16 @@ import Filter from './components/Filter';
 import './index.css';
 //import noteService from './services/notes';
 import personsService from './services/persons';
+import Notification from './components/Notification';
 
 const App = props => {
     const [persons, setPersons] = useState([]);
     const [newName, setNewName] = useState('');
     const [newNumber, setNewNumber] = useState('');
     const [search, setSearch] = useState('');
+    const [notification, setNotification] = useState(null);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = event => {
         event.preventDefault();
 
         const userExists = persons.find(person => person.name === newName);
@@ -47,10 +49,27 @@ const App = props => {
         .update(id, changedPerson)
         .then(returnedPerson => {
             setPersons(persons.map(person => person.id !== id ? person : returnedPerson));
+            setNotification({
+                message: `Updated ${returnedPerson.name}`,
+                success: true
+            });
+
+            clearNotification();
         })
         .catch(error => {
-            console.log(error);
+            setNotification({
+                message: `Information of ${changedPerson.name} has already been removed from the server`, 
+                success: false
+            });
+
+            clearNotification();
         });
+    };
+
+    const clearNotification = () => {
+        setTimeout(() => {
+            setNotification(null);
+        }, 2000);
     };
 
     const addNewPerson = newPerson => {
@@ -58,9 +77,20 @@ const App = props => {
         .create(newPerson)
         .then(returnedPerson => {
             setPersons(persons.concat(returnedPerson));
+            setNotification({
+                message: `Added ${returnedPerson.name}`, 
+                success: true
+            });
+
+            clearNotification();
         })
         .catch(error => {
-            console.log(error);
+            setNotification({
+                message: `Information of ${newPerson.name} has already been removed from the server`, 
+                success: false
+            });
+
+            clearNotification();
         });
     };
 
@@ -72,9 +102,20 @@ const App = props => {
             .remove(id)
             .then(response => {
                 setPersons(persons.filter(person => person.id !== id));
+                setNotification({
+                    message: `Deleted ${person.name}`, 
+                    success: true
+                });
+
+                clearNotification();
             })
             .catch(error => {
-                console.log(error);
+                setNotification({
+                    message: `Information of ${person.name} has already been removed from the server`, 
+                    success: false
+                });
+
+                clearNotification();
             });
         }
     };
@@ -104,12 +145,15 @@ const App = props => {
 
     return (
         <div>
-            <h2>Phonebook</h2>
-            <Filter search={search} handleSearch={handleSearch}  />
-            <h3>Add a new</h3>
-            <PersonForm handleSubmit={handleSubmit} newName={newName} handleName={handleName} newNumber={newNumber} handleNumber={handleNumber} />
-            <h3>Numbers</h3>
-            <Persons persons={persons} search={search} handleDelete={handleDelete} />
+            <Notification notification={notification} />
+            <div className="container">
+                <h2>Phonebook</h2>
+                <Filter search={search} handleSearch={handleSearch}  />
+                <h3>Add a new</h3>
+                <PersonForm handleSubmit={handleSubmit} newName={newName} handleName={handleName} newNumber={newNumber} handleNumber={handleNumber} />
+                <h3>Numbers</h3>
+                <Persons persons={persons} search={search} handleDelete={handleDelete} />
+            </div>
         </div>
     );
 };
